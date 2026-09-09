@@ -42,6 +42,20 @@ MASK_URL = "precomputed://gs://h01-release/data/20210601/masking"
 PROPS_URL = ("https://storage.googleapis.com/h01-release/data/20210601"
              "/c3/segment_properties/info")
 
+# masking 层的语义标签。来源（官方，非猜测）：
+#   gs://h01-release/data/20210601/masking/segment_properties/info
+# 官方数据页 h01-release.storage.googleapis.com/data.html 描述：
+#   "Masking model that identifies neuropil, nuclei, blood vessels, myelin, and fissures"
+#
+# 重要：masking **不是「缺陷掩码」，而是组织类型分割图**。
+#   1 neuropil      神经毡 —— 神经元突起交织区，突触几乎都在这，是我们唯一想要的
+#   3 nucleus       细胞核
+#   4 blood vessel  血管（非脑实质）
+#   5 myelin        髓鞘
+#   7 fissure       裂隙 —— **这才是缺陷**（褶皱 / 裂缝 / 组织撕裂）
+MASK_LABELS = {1: "neuropil", 3: "nucleus", 4: "blood vessel",
+               5: "myelin", 7: "fissure"}
+
 BYTES_PER_VOXEL = {"uint8": 1, "uint16": 2, "uint32": 4, "uint64": 8}
 
 
