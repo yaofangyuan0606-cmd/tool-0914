@@ -144,7 +144,21 @@ h01 limits --center 247552,193664,2001 --json limits.json
 - `position` 的三个数就是 **x, y, z**，单位与工具一致（8 nm 体素），**直接拿来用**
 - 想以某个点为中心截一块边长 `S` 的正方形：`x = cx - S/2` 到 `cx + S/2`，y 同理
 
-**数据集边界**：x < 515892，y < 356400，z < 5293。超了会报错。
+### 坐标的范围（xyz 上下限）
+
+xyz 上下限**只有一个真相来源**：`pipelines/common.py` 里的 `DATASET` 常量（mip1 / 8nm 体素单位）。`h01kit/cli.py` 和所有校验都从它导入，README 不再单独写死数字，所以改一处、处处同步，不会脱节。
+
+| 轴 | 下限 | 上限（来自 DATASET） | 说明 |
+|---|---|---|---|
+| x | 0 | 515892 | mip1 = 8 nm/体素 |
+| y | 0 | 356400 | mip1 = 8 nm/体素 |
+| z | 0 | 5293 | mip1 = 33 nm/体素 |
+
+- 单位：CLI 的 xyz 就是 mip1（8nm/8nm/33nm）体素坐标，**与 Neuroglancer `position` 1:1 对应**，直接拿来用。
+- **`fetch` 会严格校验**：越界（含负数、终点 ≤ 起点）直接报错并指出是哪根轴、上限多少；不再把错误甩给底层的 chunk 读取。
+- **`shot`（截图）不校验**：Neuroglancer 可以渲染越界区域（只是空白/边缘），所以截图要你自己保证落在范围内。
+- **`--align` 会向外吸附**：靠近数据集边缘时，吸附后的范围可能超出上限导致报错——贴边取数时要么留一点余量，要么去掉 `--align`。
+- 自查上限：`python -c "from pipelines.common import DATASET; print(DATASET)"`，或直接 `grep -n DATASET h01kit/cli.py`。
 
 ---
 

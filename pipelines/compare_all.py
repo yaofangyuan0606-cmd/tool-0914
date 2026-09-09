@@ -24,7 +24,7 @@ import s0_index
 import s2_fetch
 import s3_render
 import s4_shot
-from common import DEMO1_DIR, ROOT, human
+from common import ROOT, human
 
 # FEASIBILITY §6.2 的估算值（不实跑，单张 45–120 s，$0.06–0.30）
 M4_EST = {"seconds_per_slice": 82.5, "usd_per_slice": 0.18,

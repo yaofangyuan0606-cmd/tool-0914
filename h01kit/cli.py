@@ -13,33 +13,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PIPELINES = ROOT / "pipelines"
 
-# mip1（8nm/8nm/33nm）体素单位下的数据集尺寸
-DATASET = {"x": 515892, "y": 356400, "z": 5293}
-
 sys.path.insert(0, str(PIPELINES))
 
+# 数据集 xyz 上限的唯一真相来源，从 pipelines/common.py 导入，避免与 README 重复硬编码
+from common import DATASET, find_node
 
-def _find_node():
-    """定位 node 可执行文件。
-
-    优先级：H01_NODE_BIN 环境变量 → 常见安装位置 → PATH 里的 node。
-    不再写死某台机器的绝对路径，方便把工具交给同事。
-    """
-    cand = os.environ.get("H01_NODE_BIN")
-    if cand:
-        p = Path(cand).expanduser()
-        if p.is_dir():
-            p = p / "node"
-        if p.exists():
-            return str(p)
-    for legacy in ("/Users/mac/.workbuddy/binaries/node/versions/22.22.2/bin/node",
-                   "/opt/homebrew/bin/node", "/usr/local/bin/node"):
-        if os.path.exists(legacy):
-            return legacy
-    return shutil.which("node")
-
-
-NODE = _find_node()
+# node 定位逻辑统一放在 pipelines/common.py 的 find_node()，这里直接复用
+NODE = find_node()
 
 
 def _node_env():

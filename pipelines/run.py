@@ -23,6 +23,8 @@ import s2_fetch
 import s3_render
 import s4_shot
 
+from common import check_range
+
 SCENARIOS = {
     "celltype": "S0 属性表 + （可选）骨架；不取体素、不截图",
     "seg-train": "S0 → S1 质控 → S2 取 EM+SEG → S3 本地渲染",
@@ -62,6 +64,7 @@ def main():
         if not (a.x and a.y and a.z):
             ap.error(f"{a.scenario} 需要 --x --y --z")
         x0, x1 = _rng(a.x); y0, y1 = _rng(a.y); z0, z1 = _rng(a.z)
+        check_range(x0, x1, y0, y1, z0, z1)   # 越界直接报错，不给 cloud-volume 甩锅
 
     if a.scenario == "celltype":
         import s0_index

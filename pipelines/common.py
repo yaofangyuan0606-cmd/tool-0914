@@ -1,17 +1,40 @@
-"""共享工具：路径常量、线上字节统计、计时、chunk 算术。
+"""共享工具：路径常量、数据集边界、线上字节统计、计时、chunk 算术、node 定位。
 
-只新增，不修改 demo1_screenshot / demo2_fetch 里已有的任何代码。
+设计约定：
+- DATASET 是 xyz 上下限的唯一真相来源（mip1 / 8nm 体素单位）。README、cli、校验
+  全部从这里取，杜绝在多处硬编码同一组魔法数字导致漂移。
+- node 定位只走「环境变量 / 常见安装位置 / PATH」，不再写死某台机器的绝对路径，
+  这样工具交给同事也能跑。
 """
 import math
 import os
 import re
+import shutil
 import time
 from contextlib import contextmanager
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEMO1_DIR = os.path.join(ROOT, "demo1_screenshot")
-DEMO2_DIR = os.path.join(ROOT, "demo2_fetch")
-NODE22_BIN = "/Users/mac/.workbuddy/binaries/node/versions/22.22.2/bin"
+
+# mip1（8nm/8nm/33nm）体素单位下的数据集尺寸 —— xyz 上下限的唯一真相来源。
+# 下限恒为 0（H01 公开数据集从原点开始）；上限见此。改这里，README 与校验自动跟着变。
+DATASET = {"x": 515892, "y": 356400, "z": 5293}
+
+
+def find_node():
+    """定位 node 可执行文件，优先级：H01_NODE_BIN 环境变量 → 常见安装位置 → PATH。
+
+    不再写死某台机器的绝对路径，方便把工具交给同事。
+    """
+    cand = os.environ.get("H01_NODE_BIN")
+    if cand:
+        p = os.path.join(cand, "node") if os.path.isdir(cand) else cand
+        if os.path.exists(p):
+            return p
+    for legacy in ("/Users/mac/.workbuddy/binaries/node/versions/22.22.2/bin/node",
+                   "/opt/homebrew/bin/node", "/usr/local/bin/node"):
+        if os.path.exists(legacy):
+            return legacy
+    return shutil.which("node")
 
 EM_URL = "precomputed://gs://h01-release/data/20210601/4nm_raw"
 SEG_URL = "precomputed://gs://h01-release/data/20210601/c3"
@@ -84,6 +107,24 @@ def human(nbytes):
             return f"{nbytes:.1f} {unit}"
         nbytes /= 1024.0
     return f"{nbytes:.1f} TB"
+
+
+def check_range(x0, x1, y0, y1, z0, z1):
+    """校验 xyz 是否在数据集范围内（半开区间，单位 mip1 体素）。
+
+    越界会给出清晰报错，而不是把错误甩给 cloud-volume 的 chunk 层。
+    坐标以 DATASET 常量为准，因此上限随数据集动态变化、不会和 README 脱节。
+    """
+    for name, lo, hi, top in (("x", x0, x1, DATASET["x"]),
+                              ("y", y0, y1, DATASET["y"]),
+                              ("z", z0, z1, DATASET["z"])):
+        if lo < 0 or hi > top:
+            raise ValueError(
+                f"{name} 范围 [{lo}, {hi}) 超出数据集边界 [0, {top})。"
+                f"（上限来自 pipelines/common.py 的 DATASET 常量；"
+                f"可用 `python -c \"from pipelines.common import DATASET; print(DATASET)\"` 自查）")
+        if hi <= lo:
+            raise ValueError(f"{name} 范围非法：终点 {hi} 必须 > 起点 {lo}")
 
 
 def open_cv(url, mip, parallel=8, fill_missing=False, progress=False):

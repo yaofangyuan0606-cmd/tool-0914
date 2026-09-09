@@ -20,8 +20,8 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DEMO1 = ROOT / "demo1_screenshot"
-NODE_BIN = "/Users/mac/.workbuddy/binaries/node/versions/22.22.2/bin"
+sys.path.insert(0, str(ROOT / "pipelines"))
+from common import find_node   # 复用统一的 node 定位，不再写死某台机器的绝对路径
 URL_FILE = ROOT / "test_url2" / "new_url.txt"
 
 # 与 test_data 保持一致的测试范围（z=2001 单切片）
@@ -31,7 +31,9 @@ BASELINE_NONBLACK = 0.978  # test_data 里 z=2001 的实测值，作为合格线
 
 def _node_env():
     env = dict(os.environ)
-    env["PATH"] = NODE_BIN + os.pathsep + env.get("PATH", "")
+    node = find_node()
+    if node:
+        env["PATH"] = os.path.dirname(node) + os.pathsep + env.get("PATH", "")
     return env
 
 
@@ -41,13 +43,17 @@ def run_one(wait, settle, out, z=Z):
         shutil.rmtree(out)
     out.mkdir(parents=True, exist_ok=True)
     url = URL_FILE.read_text().strip()
-    cmd = ["node", "screenshot_range.js",
+    node = find_node()
+    if not node:
+        raise SystemExit("找不到 node：请安装 Node.js >=18，或设置 H01_NODE_BIN 环境变量")
+    script = str(ROOT / "pipelines" / "shot_batch.js")
+    cmd = [node, script,
            "--x", X, "--y", Y, "--z", z,
            "--wait", str(wait), "--settle", str(settle),
            "--seg", "--segments", "all",
            "--url", url, "--out", str(out)]
     t0 = time.time()
-    proc = subprocess.run(cmd, cwd=str(DEMO1), env=_node_env(),
+    proc = subprocess.run(cmd, cwd=str(ROOT / "pipelines"), env=_node_env(),
                           capture_output=True, text=True)
     wall = time.time() - t0
     if proc.returncode != 0:
@@ -63,7 +69,7 @@ def run_one(wait, settle, out, z=Z):
     tm = sl.get("timings_ms", {})
     ld = sl.get("load", {})
     total = tm.get("total", 0)
-    return {
+    r = {
         "wait": wait, "settle": settle, "ok": bool(ld.get("ok")),
         "is_ready": bool(ld.get("viewer_isReady")),
         "nonblack": round(ld.get("range_nonBlackFraction", 0), 4),
@@ -73,8 +79,10 @@ def run_one(wait, settle, out, z=Z):
         "wall_s": round(wall, 2),
         # 除去写死的等待之后，真正「有用」的耗时
         "work_ms": max(total - wait - settle, 0),
-        "png": str((out / f"z_{z.split('-')[0]}.png")) if (out / f"z_{z.split('-')[0]}.png").exists() else None,
     }
+    pngs = list(out.glob("*.png"))
+    r["png"] = str(pngs[0]) if pngs else None
+    return r
 
 
 def sweep(tmp):
