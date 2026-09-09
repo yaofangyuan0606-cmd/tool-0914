@@ -107,6 +107,8 @@ def main():
         if not a.align and r["amplification"] > 1.5:
             print(f"     ！未对齐：已传输 {r['transferred_voxels']:,} 体素却只留下 "
                   f"{r['read_voxels']:,}，加 --align 可零成本多拿 {r['amplification']:.1f} 倍")
+        # 先落 run.json，供 S3 渲染时读取 xyz 范围写入文件名（否则会退化成 xyzNA）
+        json.dump(log, open(os.path.join(a.out, "run.json"), "w"), indent=1)
 
     if a.scenario in ("seg-train", "morph"):
         print("[S3] 本地渲染（不开浏览器）…")
