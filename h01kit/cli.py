@@ -155,6 +155,25 @@ def cmd_limits(a):
     return 0
 
 
+# ---------------- export：我们的结果 → Neuroglancer 可读数据源 ----------------
+def cmd_export(a):
+    """委托给 pipelines/s5_export.py（导出 Precomputed + 生成 viewer 链接）。"""
+    import s5_export
+    argv = ["--ours", a.ours, "--offset", a.offset, "--out", a.out,
+            "--name", a.name]
+    if a.layer_type:
+        argv += ["--layer-type", a.layer_type]
+    if a.serve_url:
+        argv += ["--serve-url", a.serve_url]
+    if a.base_url:
+        argv += ["--base-url", a.base_url]
+    if a.state_json:
+        argv += ["--state-json", a.state_json]
+    if a.connect_url:
+        argv += ["--connect-url", a.connect_url]
+    return s5_export.main(argv)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="h01", description="H01 连接组数据工具")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -213,6 +232,21 @@ def main(argv=None):
     p.add_argument("--tmp", default="/tmp/h01_limits")
     p.add_argument("--json", default=None)
     p.set_defaults(func=cmd_limits)
+
+    p = sub.add_parser("export",
+                       help="我们的结果 → Neuroglancer 可读取的 Precomputed + 分享链接")
+    p.add_argument("--ours", required=True, help="我们的结果文件（.npy）")
+    p.add_argument("--offset", required=True, help="该块全局起点 x,y,z（mip1 体素）")
+    p.add_argument("--out", required=True, help="Precomputed 输出目录")
+    p.add_argument("--name", default="our result", help="viewer 里显示的图层名")
+    p.add_argument("--layer-type", default=None, help="segmentation / image，不给则按 dtype 推断")
+    p.add_argument("--serve-url", default=None,
+                   help="目录托管后的 HTTP 地址；在线 viewer 读不到 file://")
+    p.add_argument("--base-url", default=None, help="Neuroglancer 站点地址")
+    p.add_argument("--state-json", default=None, help="把 viewer state 另存为 JSON")
+    p.add_argument("--connect-url", default=None,
+                   help="预留：连接正确性标注层地址（s6_connect 实现后用）")
+    p.set_defaults(func=cmd_export)
 
     a = ap.parse_args(argv)
     if a.cmd == "limits":
