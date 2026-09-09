@@ -19,8 +19,8 @@ H01 连接组数据工具：取数 / 本地重绘 / 批量截图 / xyz 范围探
 ## 二、安装
 
 ```bash
-# 1. 进入项目
-cd /path/to/PythonProject
+# 1. 进入项目（clone 下来的目录，默认叫 tool-0914）
+cd tool-0914
 
 # 2. 建虚拟环境（推荐，避免污染系统 Python）
 python3 -m venv .venv
