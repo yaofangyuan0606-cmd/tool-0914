@@ -1,0 +1,12 @@
+{
+  "name": "h01kit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "H01 连接组数据工具。只有 h01 shot / h01 limits 需要 playwright（开浏览器截图）",
+  "scripts": {
+    "install:browser": "playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  }
+}

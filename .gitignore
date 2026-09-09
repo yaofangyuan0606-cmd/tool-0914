@@ -1,0 +1,38 @@
+# ---------- 运行环境 ----------
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.py[cod]
+*.egg-info/
+h01kit.egg-info/
+
+# ---------- 编辑器 / 系统 ----------
+.idea/
+.vscode/
+.DS_Store
+
+# ---------- 数据产物（跑出来的，不进仓库）----------
+*.npy
+*.png
+out/
+figs/
+bench_*/
+test_data/
+test_url2/
+verify_*/
+fix_*/
+comparison*.json
+comparison*.png
+limits.json
+
+# ---------- 本地笔记（Agent 工作记录）----------
+.workbuddy/
+
+# ---------- 无关残留 ----------
+main.py
+great_snakes_*.py
+
+# ---------- 个人 / 业务文件（不进公开仓库）----------
+resume_h01.md
+demo1_screenshot/boss_url.txt
