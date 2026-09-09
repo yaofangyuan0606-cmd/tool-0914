@@ -46,16 +46,16 @@ h01 --help
 
 ```bash
 # 查看 npy 信息（纯本地）
-h01 info --npy test_data/demo2_fetch
+h01 info --npy data/block1
 
 # 本地重绘：npy → PNG（不碰网络、不开浏览器，几十 ms/片）
-h01 render --npy test_data/demo2_fetch --kind em,overlay,boundary --out test_data/figs
+h01 render --npy data/block1 --kind em,overlay,boundary --out data/block1/figs
 
 # 取数：xyz 范围 → npy + 本地重绘（走网络，这是完整流水线）
-h01 fetch --x 247552-247808 --y 193664-193920 --z 2001-2002 --align --out test_data/pipe_out
+h01 fetch --x 247552-247808 --y 193664-193920 --z 2001-2002 --align --out data/block1
 
 # 批量截图（开浏览器，首片 ~13s，后续 ~2s）
-h01 shot --x 247296-247808 --y 193408-193920 --z 2001-2003 --seg --out test_data/shots
+h01 shot --x 247296-247808 --y 193408-193920 --z 2001-2003 --seg --out figs
 
 # 探测单次截图能覆盖的 xyz 范围上下限
 h01 limits --center 247552,193664,2001 --json limits.json
@@ -108,7 +108,10 @@ sudo ln -sf "$(pwd)/.venv/bin/h01" /usr/local/bin/h01
 
 4. **带宽是瓶颈**：出口带宽约 4 MB/s，**并发无效**（实测 2/4 并发都卡在 ~6 片/分钟），别盲目加并发。
 
-5. **产物别放 `/tmp`**，重启会被清空。输出到项目目录（如 `test_data/...`）。
+5. **产物别放 `/tmp`**，重启会被清空。输出到项目目录（如 `data/...`）。
+
+6. **仓库里不带示例数据**（`test_data/` 等测试产物已排除），所以没有现成的 `npy`。
+   顺序是：先 `h01 fetch` 拉一块，再拿它的输出目录做 `info` / `render`。
 
 6. **流水线默认不截图**：`fetch` 是「取数 → 本地重绘」，不开浏览器。
    截图（`shot`）只在抽检 / 出汇报图时才用。

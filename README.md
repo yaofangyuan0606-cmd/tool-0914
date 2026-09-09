@@ -56,7 +56,7 @@ h01 --help
 ### 1. `h01 fetch` —— 取数据（主力命令）
 
 ```bash
-h01 fetch --x 247552-247808 --y 193664-193920 --z 2001-2002 --align --out test_data/pipe_out
+h01 fetch --x 247552-247808 --y 193664-193920 --z 2001-2002 --align --out data/block1
 ```
 
 内部流程：`S1 掩膜质检 → S2 取体素 → S3 本地渲染`
@@ -84,7 +84,7 @@ h01 fetch --x 247552-247808 --y 193664-193920 --z 2001-2002 --align --out test_d
 ### 2. `h01 render` —— 本地重绘（不碰网络）
 
 ```bash
-h01 render --npy test_data/demo2_fetch --kind em,overlay,boundary --out test_data/figs
+h01 render --npy data/block1 --kind em,overlay,boundary --out data/block1/figs_all
 ```
 
 | 参数 | 说明 |
@@ -97,7 +97,7 @@ h01 render --npy test_data/demo2_fetch --kind em,overlay,boundary --out test_dat
 ### 3. `h01 shot` —— 浏览器截图
 
 ```bash
-h01 shot --x 247296-247808 --y 193408-193920 --z 2001-2003 --seg --out test_data/shots
+h01 shot --x 247296-247808 --y 193408-193920 --z 2001-2003 --seg --out figs
 ```
 
 | 参数 | 说明 |
@@ -111,10 +111,13 @@ h01 shot --x 247296-247808 --y 193408-193920 --z 2001-2003 --seg --out test_data
 ### 4. `h01 info` —— 查看 npy
 
 ```bash
-h01 info --npy test_data/demo2_fetch
+h01 info --npy data/block1
 ```
 
 输出形状、dtype、灰度统计、分割 ID 数量与占比。
+
+> 顺序是：**先 `fetch` 拉一块数据，再拿它的输出目录做 `info` / `render`**。
+> 仓库里不带示例数据（`test_data/` 等测试产物已排除），所以没有现成的 `npy` 可看。
 
 ### 5. `h01 limits` —— 探测范围上下限
 
