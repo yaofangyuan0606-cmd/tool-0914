@@ -35,4 +35,6 @@ great_snakes_*.py
 
 # ---------- 个人 / 业务文件（不进公开仓库）----------
 resume_h01.md
-demo1_screenshot/boss_url.txt
+# 早期原型草稿（已被 h01 工具取代，仅本地保留，不进仓库）
+demo1_screenshot/
+demo2_fetch/
