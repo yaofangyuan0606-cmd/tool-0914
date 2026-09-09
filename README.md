@@ -81,6 +81,10 @@ h01 fetch --x 247552-247808 --y 193664-193920 --z 2001-2002 --align --out data/b
 
 产物：`em.npy`、`seg.npy`、`figs/`（em + overlay 图）、`run.json`（每步耗时与字节）。
 
+> `figs/` 每张图命名为 `<时间戳>_x起-止_y起-止_z起-止_<kind>_z<片号>.png`，例如
+> `20260909_131908_x247552-247680_y193664-193920_z1984-2016_em_z0000.png`——时间戳和 xyz 范围都写在文件名里，
+> 方便区分批次、回溯来源。xyz 取自同目录 `run.json`；对非 `fetch` 产出的 npy 会显示 `xyzNA`。
+
 ### 2. `h01 render` —— 本地重绘（不碰网络）
 
 ```bash
@@ -106,7 +110,7 @@ h01 shot --x 247296-247808 --y 193408-193920 --z 2001-2003 --seg --out figs
 | `--segments` | `all` / `boss`（老板 URL 里的那些）/ 指定 ID |
 | `--width --height` | 视口尺寸。**输出像素 = 高 − 46**，这是分辨率瓶颈 |
 
-产物：`z_XXXX.png`（裁剪后）、`full_z_XXXX.png`（整幅）、`meta.json`（URL、坐标、nm/px、耗时）。
+产物：`<时间戳>_x起-止_y起-止_z起-止_z<片号>.png`（裁剪后）、同前缀加 `full_` 的整幅图、`meta.json`（URL、坐标、nm/px、耗时）。
 
 ### 4. `h01 info` —— 查看 npy
 

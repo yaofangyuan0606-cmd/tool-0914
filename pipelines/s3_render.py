@@ -10,6 +10,7 @@
     python s3_render.py --npy out/roi --out figs --kind em,overlay,boundary --scale 4
 """
 import argparse
+import json
 import os
 import sys
 import time
@@ -80,17 +81,34 @@ def _up(img, scale):
     return img
 
 
+def _xyz_tag(npy_dir):
+    """从 run.json 取实际读取的 xyz 范围，拼成文件名片段；没有就标 xyzNA。"""
+    rp = os.path.join(npy_dir, "run.json")
+    if os.path.exists(rp):
+        try:
+            s2 = json.load(open(rp)).get("s2", {})
+            r = s2.get("read") or s2.get("requested")
+            if r and r.get("x") and r.get("y") and r.get("z"):
+                return (f"x{r['x'][0]}-{r['x'][1]}_y{r['y'][0]}-{r['y'][1]}"
+                        f"_z{r['z'][0]}-{r['z'][1]}")
+        except Exception:
+            pass
+    return "xyzNA"
+
+
 def run(npy_dir, out_dir, kinds=("em", "overlay"), scale=1, alpha=0.4):
     os.makedirs(out_dir, exist_ok=True)
     em, seg = load(npy_dir)
     nz = (em if em is not None else seg).shape[2]
+    ts = time.strftime("%Y%m%d_%H%M%S")        # 时间戳前缀，便于区分批次
+    xyzt = _xyz_tag(npy_dir)                    # xyz 范围前缀（来自 run.json）
     t0 = time.time()
     written = []
     for zi in range(nz):
         g, lab = slice_xy(em, seg, zi)
         tag = str(zi).zfill(4)
         for kind in kinds:
-            fn = os.path.join(out_dir, f"{kind}_z{tag}.png")
+            fn = os.path.join(out_dir, f"{ts}_{xyzt}_{kind}_z{tag}.png")
             if kind == "em":
                 img = render_em(g, scale)
             elif kind == "overlay":

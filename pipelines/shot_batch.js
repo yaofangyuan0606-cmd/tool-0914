@@ -35,7 +35,7 @@ if (!chromium) {
   console.error('    export PLAYWRIGHT_PATH=/path/to/node_modules/playwright');
   process.exit(1);
 }
-const png = require(path.join(DEMO1, 'png.js'));
+const png = require('./png.js');
 
 const NG_BASE = 'https://h01-dot-neuroglancer-demo.appspot.com/';
 const BOSS_URL_FILE = path.join(DEMO1, 'boss_url.txt');
@@ -143,6 +143,14 @@ async function main() {
   const usableW = panel.w - 2 * args.margin, usableH = panel.h - 2 * args.margin;
   const scale = Math.max((xB - xA) / usableW, (yB - yA) / usableH);
   const nmPerPixel = { x: scale * unitNm.x, y: scale * unitNm.y };
+
+  // 文件名前缀：时间戳 + xyz 范围，便于区分不同批次、回溯来源
+  const pad = (n) => String(n).padStart(2, '0');
+  const d = new Date();
+  const ts = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_` +
+             `${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+  const xyzPart = `x${xA}-${xB}_y${yA}-${yB}_z${zStart}-${zEnd}`;
+  const pref = `${ts}_${xyzPart}_`;
   const cx = (xA + xB) / 2, cy = (yA + yB) / 2;
   const panelCx = panel.x + panel.w / 2, panelCy = panel.y + panel.h / 2;
   const box = { x: panelCx + (xA - cx) / scale, y: panelCy + (yA - cy) / scale,
@@ -202,8 +210,8 @@ async function main() {
       rec.load.range_meanGray = st.meanGray;
       rec.load.ok = st.nonBlackFraction >= args.minNonBlack;
 
-      const fullPath = path.join(args.out, `full_z_${zStr}.png`);
-      const cropPath = path.join(args.out, `z_${zStr}.png`);
+      const fullPath = path.join(args.out, `${pref}full_z${zStr}.png`);
+      const cropPath = path.join(args.out, `${pref}z${zStr}.png`);
       fs.writeFileSync(fullPath, png.encode(full));
       fs.writeFileSync(cropPath, png.encode(cropped));
       rec.files = { full: fullPath, range: cropPath };
