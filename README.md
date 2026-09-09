@@ -223,12 +223,10 @@ sudo ln -sf "$(pwd)/.venv/bin/h01" /usr/local/bin/h01
 |---|---|
 | `h01kit/` | 命令行工具本体（`h01` 命令） |
 | `pipelines/` | 流水线实现：`s0` 属性表 → `s1` 质检 → `s2` 取数 → `s3` 重绘 → `s4` 截图 |
-| `demo1_screenshot/` | 方案 1 原始脚本：无头浏览器按范围截图（**已被 `h01 shot` 取代**） |
-| `demo2_fetch/` | 方案 2 原始脚本：cloud-volume 直接取体素（**已被 `h01 fetch` 取代**） |
 | `SETUP.md` | 详细安装文档 |
 | `FEASIBILITY.md` | 完整可行性报告与四种方法的实测对比 |
 
-> `demo1_screenshot/` 和 `demo2_fetch/` 是最早的两个验证脚本，日常使用直接用 `h01` 即可。
+> `demo1_screenshot/`、`demo2_fetch/` 是最早的两个验证脚本（方案 1 浏览器截图、方案 2 cloud-volume 直取），**已被 `h01 shot` / `h01 fetch` 取代，已从仓库移除、仅本地保留**，日常使用直接用 `h01` 即可。
 
 ---
 
@@ -236,5 +234,5 @@ sudo ln -sf "$(pwd)/.venv/bin/h01" /usr/local/bin/h01
 
 - **`SETUP.md`** —— 完整安装步骤与排错
 - **`FEASIBILITY.md`** —— 为什么这么设计、四种方法的实测对比（最快与最慢差约 33000 倍）
-- **`demo1_screenshot/README.md`** —— 截图方案的原理与像素→坐标换算
-- **`demo2_fetch/README.md`** —— 取数方案的原理与 chunk / 读放大
+
+> 早期原型 `demo1_screenshot/`、`demo2_fetch/` 的原理 README 未随仓库发布，仅本地可见；其能力均已并入 `h01 shot` / `h01 fetch`。

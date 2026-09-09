@@ -12,7 +12,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PIPELINES = ROOT / "pipelines"
-DEMO1 = ROOT / "demo1_screenshot"
 
 # mip1（8nm/8nm/33nm）体素单位下的数据集尺寸
 DATASET = {"x": 515892, "y": 356400, "z": 5293}
